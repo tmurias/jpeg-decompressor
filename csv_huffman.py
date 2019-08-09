@@ -8,17 +8,38 @@ class HuffmanNode(binarytree.Node):
         super(HuffmanNode, self).__init__(value, left, right)
 
 def encode_csv(csv_filename):
-    csv_values = genfromtxt(sys.argv[1], delimiter=',')
+    csv_values = np.genfromtxt(csv_filename, delimiter=',')
     freq_counter = dict()
-    for val in np.nditer(csv_values):
-        if val in freq_counter:
-            freq_counter[val] += 1
+    print(csv_values.shape)
+    for val in csv_values.flat:
+        val_int = int(val)
+        if val_int in freq_counter:
+            freq_counter[val_int] += 1
         else:
-            freq_counter[val] = 1
+            freq_counter[val_int] = 1
     hnodes = []
     for val, freq in freq_counter.items():
         hnodes.append(HuffmanNode(bytes([val]), freq))
-    # TODO: Create binary tree from nodes to determine Huffman codes
+    while len(hnodes) > 1:
+        i, ii = _two_smallest(hnodes)
+        smallest = hnodes[i]
+        sec_smallest = hnodes[ii]
+        new_label = smallest.label + sec_smallest.label
+        new_value = smallest.value + sec_smallest.value
+        new_node = HuffmanNode(new_label, new_value)
+        new_node.left = smallest
+        new_node.right = sec_smallest
+        if i > ii:
+            hnodes.pop(i)
+            hnodes.pop(ii)
+        else:
+            hnodes.pop(ii)
+            hnodes.pop(i)
+        hnodes.append(new_node)
+    huf_tree = hnodes[0]
+    print(huf_tree)
+    # TODO: Turn tree into actual values
+
 
 def _two_smallest(nodes_list):
     """Returns the indexes of the 2 HuffmanNodes in nodes_list with the smallest values.
