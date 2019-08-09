@@ -28,11 +28,11 @@ def _two_smallest(nodes_list):
     for i, hnode in enumerate(nodes_list):
         if smallest is None:
             smallest = i
-        elif sec_smallest = None:
-            sec_smallest = i
-        if hnode.value <= nodes_list[smallest].value:
+        elif hnode.value <= nodes_list[smallest].value:
             sec_smallest = smallest
             smallest = i
+        elif sec_smallest is None:
+            sec_smallest = i
         elif hnode.value < nodes_list[sec_smallest].value:
             sec_smallest = i
     return smallest, sec_smallest
