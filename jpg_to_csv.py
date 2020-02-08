@@ -1,9 +1,14 @@
+"""Parse a JPEG file, for each block print the name and byte count."""
 import sys
 
 def main():
-    # TODO: Check number of args
+    if len(sys.argv) != 2:
+        print('Error: Script requires 1 argument')
+        sys.exit()
     jpg_filename = sys.argv[1]
-    # TODO: Check if filename is jpg
+    if jpg_filename.split('.')[-1] != 'jpg':
+        print('Error: Filename passed must have .jpg extension')
+        sys.exit()
 
     blocks = dict()
     with open(jpg_filename, 'rb') as jpg_file:
@@ -21,13 +26,14 @@ def main():
                 blocks[get_block_name(buf[1])] = buf[:-2]
                 buf = buf[-2:]
         blocks[get_block_name(buf[1])] = buf
-    for byte in blocks['DHT']:
-        print(byte)
     for block_name, block_data in blocks.items():
         print(block_name + ': ' + str(len(block_data)))
 
 
 def get_block_name(byte2):
+    """Print the block name given the second byte in the header.
+    The first header byte is always 0xFF.
+    """
     if byte2 == 0xD8:
         return 'SOI'
     if byte2 == 0xC0:
@@ -50,6 +56,7 @@ def get_block_name(byte2):
         return 'COM'
     if byte2 == 0xD9:
         return 'EOI'
+
 
 if __name__ == '__main__':
     main()

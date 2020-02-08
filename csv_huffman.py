@@ -1,13 +1,27 @@
+"""Module for Huffman encoding the values from a CSV file.
+"""
 import binarytree
+from bitstring import BitArray
 import numpy as np
 
 
 class HuffmanNode(binarytree.Node):
+    """Regular Node but with a label in addition to the value.
+       The label represents the byte/character being encoded and the value is its frequency.
+    """
     def __init__(self, label, value, left=None, right=None):
         self.label = label
         super(HuffmanNode, self).__init__(value, left, right)
 
 def encode_csv(csv_filename):
+"""Huffman encode the values in the given CSV file.
+    - Read the CSV file
+    - Print the dimensions of the data
+    - Generate the Huffman tree
+    - Print the tree
+    - Print what each value will be encoded as
+    - Write the encoded bits to a binary file
+"""
     csv_values = np.genfromtxt(csv_filename, delimiter=',')
     freq_counter = dict()
     print(csv_values.shape)
@@ -38,7 +52,14 @@ def encode_csv(csv_filename):
         hnodes.append(new_node)
     huf_tree = hnodes[0]
     print(huf_tree)
-    # TODO: Turn tree into actual values
+    huf_table = _generate_table(huf_tree)
+    encoded_data = BitArray()
+    for val in csv_values.flat:
+        print('Encoding '+str(val)+' as '+str(huf_table[bytes([int(val)])]))
+        encoded_data.append(huf_table[bytes([int(val)])])
+    encoded_file = open('encoded', 'wb')
+    encoded_data.tofile(encoded_file)
+    encoded_file.close()
 
 
 def _two_smallest(nodes_list):
@@ -59,3 +80,19 @@ def _two_smallest(nodes_list):
     return smallest, sec_smallest
 
 
+def _generate_table(head):
+    table = dict()
+    code = BitArray()
+    _traverse_tree(head, table, code) 
+    return table
+
+
+def _traverse_tree(node, table, code):
+    if node is None:
+        return
+    elif node.left is None and node.right is None:
+        # This is a leaf, add its code to the table
+        table[node.label] = code
+    else:
+        _traverse_tree(node.left, table, code + '0b0')
+        _traverse_tree(node.right, table, code + '0b1')
